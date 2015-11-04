@@ -16,7 +16,7 @@ import sniffer_prot.prot_buf.*;
  *
  * @author gorec
  */
-public class RSSI_SnifferController {
+public class SnifferController {
     String address;
     int serverPort;
     int read_data_period;
@@ -25,7 +25,7 @@ public class RSSI_SnifferController {
     /**
      * @param args the command line arguments
      */
-    RSSI_SnifferController(main_form form){
+    SnifferController(main_form form){
         address="127.0.0.1";
         serverPort=7989;
         this.form=form;

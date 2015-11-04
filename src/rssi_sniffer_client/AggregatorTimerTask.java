@@ -12,15 +12,17 @@ import java.util.TimerTask;
  *
  * @author gorec
  */
-public class PendingTask extends TimerTask{    
-    PendingTask(SnifferController sniffer_ctrl){
-        this.sniffer_ctrl=sniffer_ctrl;
+public class AggregatorTimerTask extends TimerTask{
+    AggregatorTimerTask(main_form form, RSSIAggregator aggregator){
+        this.aggregator=aggregator;
+        this.form=form;
     }
     
     @Override
     public void run() {
-        sniffer_ctrl.GetData(new Date());
+        form.decIntCounter();
     }
     
-    SnifferController sniffer_ctrl;
+    main_form form;
+    RSSIAggregator aggregator;
 }

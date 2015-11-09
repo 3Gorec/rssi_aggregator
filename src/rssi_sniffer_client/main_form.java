@@ -19,7 +19,7 @@ public class main_form extends javax.swing.JFrame {
     private boolean sniffing_in_process=false;
     SnifferController sniffer_controller;
     RSSIAggregator aggregator;
-    private Number int_counter;
+    private int int_counter;
     /**
      * Creates new form main_form
      */
@@ -44,7 +44,7 @@ public class main_form extends javax.swing.JFrame {
     public void resetAggregatorState(){        
         jButton_Start.setText("Start");
         jSpinnerInterval.setEnabled(true);
-        jSpinnerInterval.setValue((Object)int_counter);
+        jSpinnerInterval.setValue((Object)10);
         int status=aggregator.Stop();            
     }
     
@@ -134,7 +134,7 @@ public class main_form extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Pending period:");
 
-        jSpinnerInterval.setModel(new javax.swing.SpinnerNumberModel(0, 0, 10000, 1));
+        jSpinnerInterval.setModel(new javax.swing.SpinnerNumberModel(10, 0, 10000, 1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -188,14 +188,15 @@ public class main_form extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton_ConnectActionPerformed
 
     private void jButton_StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_StartActionPerformed
-        int status;
+        int status;        
         if(aggregator.running_flag==false){            
-            status=aggregator.Start();
-            if(status==0){
-                jButton_Start.setText("Stop");
-                jSpinnerInterval.setEnabled(false);
-                int_counter=(Number)jSpinnerInterval.getValue();
-                
+            int_counter=((Number)jSpinnerInterval.getValue()).intValue();
+            if(int_counter>0){
+                status=aggregator.Start();
+                if(status==0){
+                    jButton_Start.setText("Stop");
+                    jSpinnerInterval.setEnabled(false);                             
+                }            
             }
         }
         else{

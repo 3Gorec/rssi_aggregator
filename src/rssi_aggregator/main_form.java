@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_sniffer_client;
+package rssi_aggregator;
 import javax.swing.*;
 import java.awt.Font;
 import java.text.ParseException;

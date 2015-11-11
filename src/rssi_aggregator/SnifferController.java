@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_sniffer_client;
+package rssi_aggregator;
 import java.lang.String;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import sniffer_prot.prot_buf.*;
+import rssi_aggregator.prot_buf.*;
 
 /**
  *

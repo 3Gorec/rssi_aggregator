@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_sniffer_client;
+package rssi_aggregator;
 
 import java.util.Date;
 import java.util.TimerTask;
@@ -12,17 +12,15 @@ import java.util.TimerTask;
  *
  * @author gorec
  */
-public class AggregatorTimerTask extends TimerTask{
-    AggregatorTimerTask(main_form form, RSSIAggregator aggregator){
-        this.aggregator=aggregator;
-        this.form=form;
+public class PendingTask extends TimerTask{    
+    PendingTask(SnifferController sniffer_ctrl){
+        this.sniffer_ctrl=sniffer_ctrl;
     }
     
     @Override
     public void run() {
-        form.decIntCounter();
+        sniffer_ctrl.GetData(new Date());
     }
     
-    main_form form;
-    RSSIAggregator aggregator;
+    SnifferController sniffer_ctrl;
 }

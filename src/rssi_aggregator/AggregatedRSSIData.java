@@ -6,23 +6,25 @@
 package rssi_aggregator;
 
 import java.util.ArrayList;
-
 /**
  *
  * @author gorec
  */
+
+
+
+
 public class AggregatedRSSIData {
-    public class TickRSSIData{
-        long timestamp;
-        ArrayList<RSSIData> rssi_data;                
-        
-        public TickRSSIData(){
-            
-        }
-    }
     
     int aggregate_time_s;
     int tick_interval_s;
     ArrayList<TickRSSIData> tick_rssi_data;
+
+    public AggregatedRSSIData(int aggregate_time_s, int tick_interval_s) {
+        tick_rssi_data=new ArrayList<>();
+        this.aggregate_time_s=aggregate_time_s;
+        this.tick_interval_s=tick_interval_s;
+    }
+    
     
 }

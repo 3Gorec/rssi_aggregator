@@ -13,21 +13,14 @@ import java.util.ArrayList;
  */
 public class RSSIData {
     
-    public class MACValueRecord{
-        public String MAC;
-        public int RSSI;
-        public MACValueRecord(){
-            MAC="00:00:00:00:00:00";
-            RSSI=0;
-        }
-    }
-    
     int snifferId;
     String SnifferName;
     ArrayList<MACValueRecord>  records;
     
-    public RSSIData(){
+    public RSSIData(int id, String name){
         records=new ArrayList<MACValueRecord>();
+        snifferId=id;
+        SnifferName=name;
     }
 }
 

@@ -16,15 +16,13 @@ import javax.swing.text.MaskFormatter;
  */
 public class main_form extends javax.swing.JFrame {
     
-    private boolean sniffing_in_process=false;
-    SnifferController sniffer_controller;
+    private boolean sniffing_in_process=false;    
     RSSIAggregator aggregator;
-    private int int_counter;
+    private int sniffing_interval;
     /**
      * Creates new form main_form
      */
-    public main_form() {
-        sniffer_controller=new SnifferController(this);
+    public main_form() {        
         aggregator=new RSSIAggregator(this);
         initComponents();             
     }
@@ -37,7 +35,7 @@ public class main_form extends javax.swing.JFrame {
             jSpinnerInterval.setValue((Object)counter);
         }
         else{
-            resetAggregatorState();
+            
         }
     }
         
@@ -64,7 +62,6 @@ public class main_form extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel_SnifferClient = new javax.swing.JPanel();
-        jButton_Connect = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabelSnifferStatus = new javax.swing.JLabel();
         jLabel_status = new javax.swing.JLabel();
@@ -79,13 +76,6 @@ public class main_form extends javax.swing.JFrame {
 
         jPanel_SnifferClient.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jButton_Connect.setText("Connect");
-        jButton_Connect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton_ConnectActionPerformed(evt);
-            }
-        });
-
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel2.setText("Status:");
 
@@ -94,12 +84,10 @@ public class main_form extends javax.swing.JFrame {
         jPanel_SnifferClientLayout.setHorizontalGroup(
             jPanel_SnifferClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel_SnifferClientLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton_Connect, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(4, 4, 4)
+                .addGap(117, 117, 117)
                 .addComponent(jLabel2)
                 .addGap(73, 73, 73)
-                .addComponent(jLabelSnifferStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabelSnifferStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel_SnifferClientLayout.setVerticalGroup(
@@ -108,9 +96,8 @@ public class main_form extends javax.swing.JFrame {
                 .addGap(45, 45, 45)
                 .addGroup(jPanel_SnifferClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jButton_Connect)
                     .addComponent(jLabelSnifferStatus))
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         jButton_Start.setText("Start");
@@ -173,30 +160,26 @@ public class main_form extends javax.swing.JFrame {
                     .addComponent(jTextPendingPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel_SnifferClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 127, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
                 .addComponent(jLabel_status))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton_ConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_ConnectActionPerformed
-        int period=sniffer_controller.SnifferConnect();
-        if(period>0){
-            jTextPendingPeriod.setText(Integer.toString(period));
-        }
-    }//GEN-LAST:event_jButton_ConnectActionPerformed
-
     private void jButton_StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_StartActionPerformed
         int status;        
         if(aggregator.running_flag==false){            
-            int_counter=((Number)jSpinnerInterval.getValue()).intValue();
-            if(int_counter>0){
-                status=aggregator.Start();
+            sniffing_interval=((Number)jSpinnerInterval.getValue()).intValue();
+            if(sniffing_interval>0){
+                status=aggregator.Start(sniffing_interval);
                 if(status==0){
                     jButton_Start.setText("Stop");
                     jSpinnerInterval.setEnabled(false);                             
-                }            
+                }                
+            }
+            else{
+                outputStatus("Invalid sniffing interval");
             }
         }
         else{
@@ -244,7 +227,6 @@ public class main_form extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton_Connect;
     private javax.swing.JButton jButton_Start;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

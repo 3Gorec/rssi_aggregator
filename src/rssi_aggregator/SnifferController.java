@@ -4,11 +4,8 @@
  * and open the template in the editor.
  */
 package rssi_aggregator;
-import java.lang.String;
 import java.io.*;
 import java.net.*;
-import java.util.Date;
-import java.util.Timer;
 import java.util.TimerTask;
 import rssi_aggregator.prot_buf.*;
 
@@ -17,42 +14,88 @@ import rssi_aggregator.prot_buf.*;
  * @author gorec
  */
 public class SnifferController {
+    class Timestamp{                
+        public long ts_sec;
+        public long ts_usec;
+        Timestamp(){
+            ts_sec=0;
+            ts_usec=0;
+        }
+        
+        Timestamp(long sec, long usec){
+            ts_sec=sec;
+            ts_usec=usec;
+        }
+        
+        public void SetTs(long sec, long usec){
+            ts_sec=sec;
+            ts_usec=usec;
+        }
+        
+        public long GetTsSec(){
+            return ts_sec;
+        }
+        
+        public long GetTsUsec(){
+            return ts_usec;
+        }
+    }
+    
     String address;
     int serverPort;
     int read_data_period;
     TimerTask pendingTask;
     main_form form;
+    public Timestamp last_ts;
+    private int recvd_data_counter;
+    int id;
+    String name;
+    
+    
+    
+    
+    
     /**
      * @param args the command line arguments
      */
-    SnifferController(main_form form){
+    SnifferController(main_form form,int sniffer_id, String sniffer_name){
         address="127.0.0.1";
         serverPort=7989;
         this.form=form;
+        last_ts=new Timestamp(0,0);
+        recvd_data_counter=0;
+        read_data_period=0;
+        id=sniffer_id;
+        name=sniffer_name;
     }
     
-    public int GetData(Date timestamp){
+    public void IncRecvdDataCounter(){
+        recvd_data_counter++;
+    }
+    
+    public void ResetSniffer(){
+        read_data_period=0;
+        recvd_data_counter=0;
+        last_ts.SetTs(0, 0);
+    }
+    
+    public int GetRecvdDataCounter(){
+        return recvd_data_counter;
+    }
+    public SnifferResponse GetData(){
         try{
-            InetAddress ipAddress=InetAddress.getByName(address);            
-            File out_file=new File("output_"+timestamp.getTime()/1000+".txt");
-            PrintWriter writer=new PrintWriter(out_file);
+            InetAddress ipAddress=InetAddress.getByName(address);                       
             SnifferResponse response;
             SnifferQuery query;
             query=SnifferQuery.newBuilder()
                 .setType(QueryType.DATA_REQUEST)
                 .build();
-            response = SendSnifferQuery(form, ipAddress,query);
-            writer.printf("***Received message***\n%s",response.toString());
-            writer.close();          
-            return 0;
+            response = SendSnifferQuery(form, ipAddress,query);             
+            return response;
         }
         catch (UnknownHostException e){
             form.outputStatus("Don't know about host " + address );            
-            return 2;
-        }
-        catch (FileNotFoundException e){
-            form.outputStatus("File not found");            
-            return 3;
+            return null;
         }
     }
     
@@ -72,24 +115,20 @@ public class SnifferController {
         switch(response.getStatus()){
            case SNIFFING_RUN:
                read_data_period=response.getAccumPeriod();
-               form.setSnifferStatus("connected");               
+               form.setSnifferStatus("Connected");               
                break;
            case SNIFFING_STOPED:
-               form.setSnifferStatus("error");
-               break;
+               form.setSnifferStatus("Error");
+               return -2;
            default:
                break;
-        }        
+        }                        
         
-        pendingTask=new PendingTask(this);
-        Timer timer=new Timer(false);
-        timer.scheduleAtFixedRate(pendingTask, 0, read_data_period*1000);
-        form.outputStatus("Connecting connected: " + address);
         return read_data_period;
         }
         catch (UnknownHostException e){
             form.outputStatus("Don't know about host " + address);            
-            return -2;
+            return -3;
         } 
     }
    

@@ -13,6 +13,9 @@ import java.util.TimerTask;
  * @author gorec
  */
 public class AggregatorTimerTask extends TimerTask{
+    int odd=0;  //for decrement second counter each second run;
+    
+    
     AggregatorTimerTask(main_form form, RSSIAggregator aggregator){
         this.aggregator=aggregator;
         this.form=form;
@@ -20,7 +23,20 @@ public class AggregatorTimerTask extends TimerTask{
     
     @Override
     public void run() {
-        form.decIntCounter();
+        if(odd==1){
+        form.decIntCounter();        
+            odd=0;
+        }
+        else{            
+            Date date=new Date();
+            aggregator.cur_tick_ts=date.getTime();
+            odd=1;
+        }                
+       
+        if(aggregator.AggregateData()!=0){
+            form.resetAggregatorState();
+            form.outputStatus("Sniffing error");
+        }
     }
     
     main_form form;

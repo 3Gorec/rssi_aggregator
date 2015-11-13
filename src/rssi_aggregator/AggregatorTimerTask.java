@@ -30,6 +30,7 @@ public class AggregatorTimerTask extends TimerTask{
         else{            
             Date date=new Date();
             aggregator.cur_tick_ts=date.getTime();
+            aggregator.aggregated_data.tick_rssi_data.add(new TickRSSIData(aggregator.cur_tick_ts));
             odd=1;
         }                
        

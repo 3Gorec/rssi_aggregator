@@ -25,7 +25,7 @@ public class RSSIAggregator {
     int rssi_ds_count;
     File out_file;
     PrintWriter writer;
-    long cur_tick_ts; //timestamp of current second tick
+    int cur_tick_index; //timestamp of current second tick
     AggregatedRSSIData aggregated_data;
     
     RSSIAggregator(main_form form){
@@ -34,7 +34,7 @@ public class RSSIAggregator {
         this.form=form;
         int ar[]=new int[10];       
         timer=new Timer(false);
-        
+        cur_tick_index=0;
         
     }
     
@@ -67,8 +67,8 @@ public class RSSIAggregator {
         form.outputStatus("Sniffing finished succesfully");
     } 
     
-    private int ProcessData(SnifferResponse data){                
-        aggregated_data.tick_rssi_data.add(new TickRSSIData(cur_tick_ts));        
+    private int ProcessData(SnifferResponse data){
+        aggregated_data.tick_interval_s
         return 0;
     }
     
@@ -84,6 +84,7 @@ public class RSSIAggregator {
                 throw e;
             }
             sniffer_controller.ResetSniffer();
+            cur_tick_index=0;
             rssi_ds_count=sniffing_interval_s/pending_period_s;
             aggregated_data=new AggregatedRSSIData(sniffing_interval_s,pending_period_s);
 

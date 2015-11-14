@@ -27,10 +27,9 @@ public class AggregatorTimerTask extends TimerTask{
         form.decIntCounter();        
             odd=0;
         }
-        else{            
-            Date date=new Date();
-            aggregator.cur_tick_ts=date.getTime();
-            aggregator.aggregated_data.tick_rssi_data.add(new TickRSSIData(aggregator.cur_tick_ts));
+        else{                        
+            aggregator.cur_tick_index++;
+            aggregator.aggregated_data.tick_rssi_data.add(new TickRSSIData((new Date()).getTime()));
             odd=1;
         }                
        

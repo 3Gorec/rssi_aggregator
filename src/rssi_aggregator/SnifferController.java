@@ -46,8 +46,7 @@ public class SnifferController {
     int read_data_period;
     TimerTask pendingTask;
     main_form form;
-    public Timestamp last_ts;
-    private int recvd_data_counter;
+    public Timestamp last_ts;    
     int id;
     String name;
     
@@ -62,26 +61,18 @@ public class SnifferController {
         address="127.0.0.1";
         serverPort=7989;
         this.form=form;
-        last_ts=new Timestamp(0,0);
-        recvd_data_counter=0;
+        last_ts=new Timestamp(0,0);        
         read_data_period=0;
         id=sniffer_id;
         name=sniffer_name;
     }
-    
-    public void IncRecvdDataCounter(){
-        recvd_data_counter++;
-    }
+       
     
     public void ResetSniffer(){
-        read_data_period=0;
-        recvd_data_counter=0;
+        read_data_period=0;    
         last_ts.SetTs(0, 0);
     }
-    
-    public int GetRecvdDataCounter(){
-        return recvd_data_counter;
-    }
+        
     public SnifferResponse GetData(){
         try{
             InetAddress ipAddress=InetAddress.getByName(address);                       

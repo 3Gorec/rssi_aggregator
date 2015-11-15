@@ -23,17 +23,17 @@ public class AggregatorTimerTask extends TimerTask{
     
     @Override
     public void run() {
-        if(odd==1){
-        form.decIntCounter();        
-            odd=0;
-        }
-        else{                        
-            aggregator.cur_tick_index++;
-            aggregator.aggregated_data.tick_rssi_data.add(new TickRSSIData((new Date()).getTime()));
+        boolean new_tick_flag=false;
+        if(odd==0){
+            new_tick_flag=true;            
             odd=1;
-        }                
+        }                  
+        else{
+            form.decIntCounter();        
+            odd=0;
+        }              
        
-        if(aggregator.AggregateData()!=0){
+        if(aggregator.AggregateData(new_tick_flag)!=0){
             form.resetAggregatorState();
             form.outputStatus("Sniffing error");
         }

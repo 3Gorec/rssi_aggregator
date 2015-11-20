@@ -59,7 +59,7 @@ public class SnifferController {
      */
     SnifferController(main_form form,int sniffer_id, String sniffer_name){
         address="127.0.0.1";
-        serverPort=7989;
+        serverPort=7999;
         this.form=form;
         last_ts=new Timestamp(0,0);        
         read_data_period=0;

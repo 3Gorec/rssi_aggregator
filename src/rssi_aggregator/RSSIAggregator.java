@@ -117,6 +117,7 @@ public class RSSIAggregator {
     
     private int ProcessData(SnifferResponse data, int sniffer_id, String sniffer_name){
         int record_cnt=data.getRssiDataCount();
+        System.out.println("Tick");
         RSSIData sniffer_data=new RSSIData(sniffer_id, sniffer_name);        
         for(int i=0;i<record_cnt;i++){
             SnifferResponse.RSSIRecord record=data.getRssiData(i); 
@@ -144,8 +145,7 @@ public class RSSIAggregator {
         }
         
         Gson gson=new Gson();
-        String json=gson.toString();
-        System.out.println(aggregated_data.tick_rssi_data.get(0).rssi_data.size());
+        String json=gson.toString();        
         writer.print(json);
         
         

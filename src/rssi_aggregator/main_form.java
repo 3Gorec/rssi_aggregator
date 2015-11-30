@@ -14,11 +14,8 @@ import javax.swing.text.MaskFormatter;
  *
  * @author gorec
  */
-public class main_form extends javax.swing.JFrame {
-    
-    private boolean sniffing_in_process=false;    
-    RSSIAggregator aggregator;
-    private int sniffing_interval;
+public class main_form extends javax.swing.JFrame {        
+    RSSIAggregator aggregator;    
     /**
      * Creates new form main_form
      */
@@ -68,9 +65,10 @@ public class main_form extends javax.swing.JFrame {
         jButton_Start = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jTextPendingPeriod = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jSpinnerInterval = new javax.swing.JSpinner();
+        jSpinnerPeriod = new javax.swing.JSpinner();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -111,17 +109,14 @@ public class main_form extends javax.swing.JFrame {
 
         jLabel4.setText("s");
 
-        jTextPendingPeriod.setEnabled(false);
-        jTextPendingPeriod.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextPendingPeriodActionPerformed(evt);
-            }
-        });
-
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Pending period:");
 
         jSpinnerInterval.setModel(new javax.swing.SpinnerNumberModel(10, 0, 10000, 1));
+
+        jSpinnerPeriod.setModel(new javax.swing.SpinnerNumberModel(1, 1, 10, 1));
+
+        jLabel5.setText("s");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -137,13 +132,14 @@ public class main_form extends javax.swing.JFrame {
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSpinnerInterval, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3)
-                        .addComponent(jLabel4))
-                    .addComponent(jTextPendingPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(168, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jSpinnerPeriod)
+                    .addComponent(jSpinnerInterval))
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -157,10 +153,11 @@ public class main_form extends javax.swing.JFrame {
                 .addGap(1, 1, 1)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextPendingPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jSpinnerPeriod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel_SnifferClient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 131, Short.MAX_VALUE)
                 .addComponent(jLabel_status))
         );
 
@@ -170,9 +167,11 @@ public class main_form extends javax.swing.JFrame {
     private void jButton_StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_StartActionPerformed
         int status;        
         if(aggregator.running_flag==false){            
-            sniffing_interval=((Number)jSpinnerInterval.getValue()).intValue();
+            int sniffing_interval=((Number)jSpinnerInterval.getValue()).intValue();
+            int pending_period=((Number)jSpinnerPeriod.getValue()).intValue();
+            
             if(sniffing_interval>0){
-                status=aggregator.Start(sniffing_interval);
+                status=aggregator.Start(sniffing_interval,pending_period);
                 if(status==0){
                     jButton_Start.setText("Stop");
                     jSpinnerInterval.setEnabled(false);                             
@@ -186,10 +185,6 @@ public class main_form extends javax.swing.JFrame {
             resetAggregatorState();
         }
     }//GEN-LAST:event_jButton_StartActionPerformed
-
-    private void jTextPendingPeriodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextPendingPeriodActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextPendingPeriodActionPerformed
 
     /**
      * @param args the command line arguments
@@ -232,10 +227,11 @@ public class main_form extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabelSnifferStatus;
     private javax.swing.JLabel jLabel_status;
     private javax.swing.JPanel jPanel_SnifferClient;
     private javax.swing.JSpinner jSpinnerInterval;
-    private javax.swing.JTextField jTextPendingPeriod;
+    private javax.swing.JSpinner jSpinnerPeriod;
     // End of variables declaration//GEN-END:variables
 }

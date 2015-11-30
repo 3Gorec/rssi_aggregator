@@ -13,45 +13,16 @@ import rssi_aggregator.prot_buf.*;
  *
  * @author gorec
  */
-public class SnifferController {
-    class Timestamp{                
-        public long ts_sec;
-        public long ts_usec;
-        Timestamp(){
-            ts_sec=0;
-            ts_usec=0;
-        }
-        
-        Timestamp(long sec, long usec){
-            ts_sec=sec;
-            ts_usec=usec;
-        }
-        
-        public void SetTs(long sec, long usec){
-            ts_sec=sec;
-            ts_usec=usec;
-        }
-        
-        public long GetTsSec(){
-            return ts_sec;
-        }
-        
-        public long GetTsUsec(){
-            return ts_usec;
-        }
-    }
+public class SnifferController {    
     
     String address;
     int serverPort;
     int read_data_period;
     TimerTask pendingTask;
-    main_form form;
-    public Timestamp last_ts;    
+    main_form form;    
     int id;
     String name;
-    
-    
-    
+    int last_record_id;
     
     
     /**
@@ -60,9 +31,9 @@ public class SnifferController {
     SnifferController(main_form form,int sniffer_id, String sniffer_name){
         address="127.0.0.1";
         serverPort=7999;
-        this.form=form;
-        last_ts=new Timestamp(0,0);        
+        this.form=form;        
         read_data_period=0;
+        last_record_id=0;
         id=sniffer_id;
         name=sniffer_name;
     }
@@ -70,7 +41,7 @@ public class SnifferController {
     
     public void ResetSniffer(){
         read_data_period=0;    
-        last_ts.SetTs(0, 0);
+        last_record_id=0;
     }
         
     public SnifferResponse GetData(){

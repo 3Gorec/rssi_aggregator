@@ -13,13 +13,11 @@ import java.util.TimerTask;
  * @author gorec
  */
 public class AggregatorTimerTask extends TimerTask{
-    int odd;  //for decrement second counter each second run;
-    boolean first_tick;
+    int odd;  //for decrement second counter each second run;    
     
     AggregatorTimerTask(main_form form, RSSIAggregator aggregator){
         this.aggregator=aggregator;
-        this.form=form;
-        first_tick=true;
+        this.form=form;        
         odd=0;
     }
     
@@ -30,21 +28,17 @@ public class AggregatorTimerTask extends TimerTask{
             new_tick_flag=true;               
             odd=1;            
         }                  
-        else{
-            if(first_tick){     //workaround situation when first two ticks aggreagte data from different intervals(i want only one data for 2 ticks)
-                first_tick=false;
-                new_tick_flag=true;               
-            }
+        else{            
             form.decIntCounter();        
             odd=0;
         }                     
         
-        if(first_tick==false){
-            if(aggregator.AggregateData(new_tick_flag)!=0){
-                form.resetAggregatorState();
-                form.outputStatus("Sniffing error");
-            }
+        
+        if(aggregator.AggregateData(new_tick_flag)!=0){
+            form.resetAggregatorState();
+            form.outputStatus("Sniffing error");
         }
+        
     }
     
     main_form form;

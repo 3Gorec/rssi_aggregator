@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,9 +25,14 @@ public class RSSIAggregator {
     main_form form;
     Timer timer;     
     TimerTask pendingTask;
-    SnifferController sniffer_controller;
-    int aggregate_call_counter;
-    int rssi_ds_count;    
+    ArrayList<SnifferController> sniffers;
+    int aggregate_call_counter;           
+    int rssi_ds_count;  
+    boolean sniffing_in_process;            
+
+
+    
+    
     File out_file;
     PrintWriter writer;    
     AggregatedRSSIData aggregated_data;    
@@ -34,39 +40,39 @@ public class RSSIAggregator {
     
     
     RSSIAggregator(main_form form){
-        sniffer_controller=new SnifferController(form,1,"AP_1");
+        sniffers = new ArrayList<>();
+        sniffers.add(new SnifferController(form,1,"AP_1"));        
         running_flag=false;
         this.form=form;
         int ar[]=new int[10];       
         timer=new Timer(false);
         aggregate_call_counter=0;
-}
+        rssi_ds_count=0; 
+        sniffing_in_process=false;    
+}   
     
     public int AggregateData(boolean new_tick_flag){
         if(new_tick_flag){                                                   
-            if(cur_tick_data!=null){
+            if(cur_tick_data!=null){    //add last tick data to array
                 aggregated_data.tick_rssi_data.add(cur_tick_data);
             }
             cur_tick_data=new TickRSSIData((new Date()).getTime());
+        }        
+        
+        for(int i=0;i<sniffers.size();i++){
+            SnifferResponse data=sniffers.get(i).GetData();        
+            if(data==null){
+                return 1;
+            }
+            if(data.getValid()==false){
+               return 1;
+            }                       
+            
+            ProcessData(data, sniffers.get(i).id, sniffers.get(i).name);
         }
         
-        SnifferResponse data=sniffer_controller.GetData();        
-        if(data==null){
-            return 1;
-        }
-        if(data.getValid()==false){
-           return 1;
-        }
-        long ts_sec=data.getTs().getTvSec();
-        long ts_usec=data.getTs().getTvUsec();
-        if(ts_sec!=sniffer_controller.last_ts.GetTsSec() || 
-                ts_usec!=sniffer_controller.last_ts.GetTsUsec()){
-            sniffer_controller.last_ts.SetTs(ts_sec, ts_usec);                        
-            ProcessData(data, sniffer_controller.id, sniffer_controller.name);
-            
-        }
         aggregate_call_counter++;
-        if(aggregate_call_counter==2*rssi_ds_count){
+        if(aggregate_call_counter==rssi_ds_count){
             FinishAgregate();            
         }
         return 0;
@@ -74,32 +80,27 @@ public class RSSIAggregator {
     
     
     
-    public int Start(int sniffing_interval_s){
+    public int Start(int sniffing_interval_s, int pending_period_s){
         try{            
             out_file=new File("output.txt");
-            writer=new PrintWriter(out_file);
+            writer=new PrintWriter(out_file);                        
             
+            for(int i=0;i<sniffers.size();i++){
+                sniffers.get(i).ResetSniffer();
+            }            
             
-            int pending_period_s=sniffer_controller.SnifferConnect();
-            if(pending_period_s<=0){        //todo add multi sniffer support
-                IllegalArgumentException e=new IllegalArgumentException();
-                throw e;
-            }
-            sniffer_controller.ResetSniffer();            
             rssi_ds_count=sniffing_interval_s/pending_period_s;
             aggregated_data=new AggregatedRSSIData(sniffing_interval_s,pending_period_s);
             cur_tick_data=null;
             aggregate_call_counter=0;
             
             pendingTask=new AggregatorTimerTask(form, this);        
-            timer.scheduleAtFixedRate(pendingTask, 0, 500*pending_period_s);                
+            timer.scheduleAtFixedRate(pendingTask, 0, pending_period_s*1000);                
             running_flag=true;
             form.outputStatus("Sniffing in progress");
             return 0;
         }
-        catch (IllegalArgumentException e){
-            return 1;
-        }
+        
         catch (FileNotFoundException e){
             form.outputStatus("File not found");            
             return 2;

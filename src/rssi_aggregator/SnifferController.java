@@ -7,7 +7,7 @@ package rssi_aggregator;
 import java.io.*;
 import java.net.*;
 import java.util.TimerTask;
-import rssi_aggregator.prot_buf.*;
+import sniffer_prot.prot_buf.*;
 
 /**
  *
@@ -16,9 +16,7 @@ import rssi_aggregator.prot_buf.*;
 public class SnifferController {    
     
     String address;
-    int serverPort;
-    int read_data_period;
-    TimerTask pendingTask;
+    int serverPort;    
     main_form form;    
     int id;
     String name;
@@ -31,26 +29,25 @@ public class SnifferController {
     SnifferController(main_form form,int sniffer_id, String sniffer_name){
         address="127.0.0.1";
         serverPort=7999;
-        this.form=form;        
-        read_data_period=0;
+        this.form=form;                
         last_record_id=0;
         id=sniffer_id;
         name=sniffer_name;
     }
        
     
-    public void ResetSniffer(){
-        read_data_period=0;    
+    public void ResetSniffer(){        
         last_record_id=0;
     }
         
-    public SnifferResponse GetData(){
+    public SnifferResponse GetData(int start_record_id){
         try{
             InetAddress ipAddress=InetAddress.getByName(address);                       
             SnifferResponse response;
             SnifferQuery query;
             query=SnifferQuery.newBuilder()
                 .setType(QueryType.DATA_REQUEST)
+                .setRecordId(start_record_id)
                 .build();
             response = SendSnifferQuery(form, ipAddress,query);             
             return response;
@@ -75,8 +72,7 @@ public class SnifferController {
             return -1;
         }
         switch(response.getStatus()){
-           case SNIFFING_RUN:
-               read_data_period=response.getAccumPeriod();
+           case SNIFFING_RUN:               
                form.setSnifferStatus("Connected");               
                break;
            case SNIFFING_STOPED:
@@ -86,7 +82,7 @@ public class SnifferController {
                break;
         }                        
         
-        return read_data_period;
+        return 0;
         }
         catch (UnknownHostException e){
             form.outputStatus("Don't know about host " + address);            

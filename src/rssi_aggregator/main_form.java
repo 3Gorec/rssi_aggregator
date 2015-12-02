@@ -176,10 +176,7 @@ public class main_form extends javax.swing.JFrame {
                     jButton_Start.setText("Stop");
                     jSpinnerInterval.setEnabled(false);                             
                 }                
-            }
-            else{
-                outputStatus("Invalid sniffing interval");
-            }
+            }            
         }
         else{
             resetAggregatorState();

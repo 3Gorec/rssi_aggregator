@@ -6,6 +6,7 @@
 package rssi_aggregator;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import rssi_aggregator.prot_buf.*;
+import sniffer_prot.prot_buf.*;
 
 
 /**
@@ -27,16 +28,13 @@ public class RSSIAggregator {
     TimerTask pendingTask;
     ArrayList<SnifferController> sniffers;
     int aggregate_call_counter;           
-    int rssi_ds_count;  
-    boolean sniffing_in_process;            
-
-
+    int total_tick_count;  
+    boolean sniffing_in_process;
     
     
     File out_file;
     PrintWriter writer;    
-    AggregatedRSSIData aggregated_data;    
-    TickRSSIData cur_tick_data;
+    AggregatedRSSIData aggregated_data;        
     
     
     RSSIAggregator(main_form form){
@@ -47,37 +45,45 @@ public class RSSIAggregator {
         int ar[]=new int[10];       
         timer=new Timer(false);
         aggregate_call_counter=0;
-        rssi_ds_count=0; 
+        total_tick_count=0;         
         sniffing_in_process=false;    
 }   
     
-    public int AggregateData(boolean new_tick_flag){
-        if(new_tick_flag){                                                   
-            if(cur_tick_data!=null){    //add last tick data to array
-                aggregated_data.tick_rssi_data.add(cur_tick_data);
-            }
-            cur_tick_data=new TickRSSIData((new Date()).getTime());
-        }        
+    public int AggregateData(){        
+        aggregated_data.tick_rssi_data.add(new TickRSSIData(new Date().getTime()));        
         
         for(int i=0;i<sniffers.size();i++){
-            SnifferResponse data=sniffers.get(i).GetData();        
+            SnifferController sniffer=sniffers.get(i);
+            SnifferResponse data=sniffer.GetData(sniffer.last_record_id);        
             if(data==null){
                 return 1;
             }
-            if(data.getValid()==false){
-               return 1;
+            if(data.getInterrupted()==true){
+               return 2;
             }                       
             
-            ProcessData(data, sniffers.get(i).id, sniffers.get(i).name);
+            ProcessData(data, sniffer);
         }
         
         aggregate_call_counter++;
-        if(aggregate_call_counter==rssi_ds_count){
+        if(aggregate_call_counter==total_tick_count){
             FinishAgregate();            
         }
         return 0;
     }  
     
+    private void InitStartRecordId(){
+        for(int i=0;i<sniffers.size();i++){
+            SnifferResponse data=sniffers.get(i).GetData(0);
+            int count=data.getRssiDataCount();
+            if(count>0){
+                sniffers.get(i).last_record_id=data.getRssiData(count-1).getId();
+            }
+            else{
+                sniffers.get(i).last_record_id=0;
+            }
+        }
+    }
     
     
     public int Start(int sniffing_interval_s, int pending_period_s){
@@ -87,14 +93,16 @@ public class RSSIAggregator {
             
             for(int i=0;i<sniffers.size();i++){
                 sniffers.get(i).ResetSniffer();
-            }            
+                if(sniffers.get(i).SnifferConnect()!=0){
+                    return 1;
+                }
+            }   
             
-            rssi_ds_count=sniffing_interval_s/pending_period_s;
+            total_tick_count=sniffing_interval_s/pending_period_s;
+            aggregate_call_counter=0;            
             aggregated_data=new AggregatedRSSIData(sniffing_interval_s,pending_period_s);
-            cur_tick_data=null;
-            aggregate_call_counter=0;
-            
-            pendingTask=new AggregatorTimerTask(form, this);        
+            InitStartRecordId();            
+            pendingTask=new AggregatorTimerTask(form, this);                  
             timer.scheduleAtFixedRate(pendingTask, 0, pending_period_s*1000);                
             running_flag=true;
             form.outputStatus("Sniffing in progress");
@@ -116,39 +124,55 @@ public class RSSIAggregator {
         return status;        
     }
     
-    private int ProcessData(SnifferResponse data, int sniffer_id, String sniffer_name){
-        int record_cnt=data.getRssiDataCount();
-        System.out.println("Tick");
-        RSSIData sniffer_data=new RSSIData(sniffer_id, sniffer_name);        
-        for(int i=0;i<record_cnt;i++){
-            SnifferResponse.RSSIRecord record=data.getRssiData(i); 
+        
+    void CopyRecords(RSSIData sniffer_data, SnifferResponse data, int start_index, int record_cnt){          
+        int i=start_index;
+        while(i<record_cnt){
+            SnifferResponse.RSSIRecord record=data.getRssiData(i);                 
             if(FilterDataByMAC(record)){
                 sniffer_data.records.add(new MACValueRecord(record.getMac().toString(), record.getRssi()));
-            }                
+            }   
+            i++;
         }
-        cur_tick_data.rssi_data.add(sniffer_data);        
+        int tick_index=aggregated_data.tick_rssi_data.size()-1;
+        aggregated_data.tick_rssi_data.get(tick_index).rssi_data.add(sniffer_data);      
+        
+    }    
+    
+    private int ProcessData(SnifferResponse data, SnifferController sniffer){      
+        int record_cnt=data.getRssiDataCount();
+        RSSIData sniffer_data;
+        System.out.println("Tick"); //todo remove        
+        
+        if(sniffer.last_record_id!=0 && record_cnt>1){
+            sniffer_data=new RSSIData(sniffer.id, sniffer.name);     
+            CopyRecords(sniffer_data,data,1,record_cnt);
+            sniffer.last_record_id=data.getRssiData(record_cnt-1).getId();
+        }
+        else{
+            if(sniffer.last_record_id==0 && record_cnt>0){
+                sniffer_data=new RSSIData(sniffer.id, sniffer.name);     
+                CopyRecords(sniffer_data,data,0,record_cnt);
+                sniffer.last_record_id=data.getRssiData(record_cnt-1).getId();
+            }
+        }
+                
         return 0;
     }    
+
+    
     
     private boolean FilterDataByMAC(SnifferResponse.RSSIRecord record){
         return true;
     }
     
     public void FinishAgregate(){        
-        int tick_count=aggregated_data.tick_rssi_data.size();
-        if(tick_count>0){
-            if(aggregated_data.tick_rssi_data.get(tick_count-1).timestamp!=cur_tick_data.timestamp){
-                aggregated_data.tick_rssi_data.add(cur_tick_data);
-            }
-        }
-        else{
-            aggregated_data.tick_rssi_data.add(cur_tick_data);
-        }
+        Gson gson=new GsonBuilder()
+                        .setPrettyPrinting()
+			.create();
         
-        Gson gson=new Gson();
-        String json=gson.toString();        
+        String json=gson.toJson(aggregated_data);        
         writer.print(json);
-        
         
         form.resetAggregatorState();
         form.outputStatus("Sniffing finished succesfully");

@@ -12,31 +12,31 @@ import java.util.TimerTask;
  *
  * @author gorec
  */
-public class AggregatorTimerTask extends TimerTask{
-    int odd;  //for decrement second counter each second run;    
+public class AggregatorTimerTask extends TimerTask{    
     
     AggregatorTimerTask(main_form form, RSSIAggregator aggregator){
         this.aggregator=aggregator;
-        this.form=form;        
-        odd=0;
+        this.form=form;            
     }
     
     @Override
     public void run() {
-        boolean new_tick_flag=false;        
-        if(odd==0){
-            new_tick_flag=true;               
-            odd=1;            
-        }                  
-        else{            
-            form.decIntCounter();        
-            odd=0;
-        }                     
+        form.decIntCounter();                    
         
-        
-        if(aggregator.AggregateData(new_tick_flag)!=0){
-            form.resetAggregatorState();
-            form.outputStatus("Sniffing error");
+        int status=aggregator.AggregateData();
+        switch(status){
+            case 0:
+                //Everything is ok
+                break;
+            case 1:
+                form.resetAggregatorState();
+                form.outputStatus("Data error");
+                break;
+            case 2:
+                form.resetAggregatorState();
+                form.outputStatus("Too much pending period: sniffer buffer overflowed");
+                break;
+                
         }
         
     }

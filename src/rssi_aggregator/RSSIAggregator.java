@@ -30,8 +30,7 @@ public class RSSIAggregator {
     int aggregate_call_counter;           
     int total_tick_count;  
     boolean sniffing_in_process;
-    
-    
+        
     File out_file;
     PrintWriter writer;    
     AggregatedRSSIData aggregated_data;        
@@ -86,9 +85,9 @@ public class RSSIAggregator {
     }
     
     
-    public int Start(int sniffing_interval_s, int pending_period_s){
+    public int Start(int sniffing_interval_s, int pending_period_s, String out_file_name){
         try{            
-            out_file=new File("output.txt");
+            out_file=new File(out_file_name);
             writer=new PrintWriter(out_file);                        
             
             for(int i=0;i<sniffers.size();i++){

@@ -129,7 +129,7 @@ public class RSSIAggregator {
         while(i<record_cnt){
             SnifferResponse.RSSIRecord record=data.getRssiData(i);                 
             if(FilterDataByMAC(record)){
-                sniffer_data.records.add(new MACValueRecord(record.getMac().toString(), record.getRssi()));
+                sniffer_data.records.add(new MACValueRecord(record.getMac(), record.getRssi()));
             }   
             i++;
         }
@@ -145,7 +145,7 @@ public class RSSIAggregator {
         
         if(sniffer.last_record_id!=0 && record_cnt>1){
             sniffer_data=new RSSIData(sniffer.id, sniffer.name);     
-            CopyRecords(sniffer_data,data,1,record_cnt);
+            CopyRecords(sniffer_data,data,1,record_cnt-1);
             sniffer.last_record_id=data.getRssiData(record_cnt-1).getId();
         }
         else{

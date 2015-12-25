@@ -5,14 +5,16 @@
  */
 package rssi_aggregator;
 
+import com.google.protobuf.ByteString;
+
 /**
  *
  * @author gorec
  */
 public class MACValueRecord{
-    public String mac;
+    public ByteString mac;
     public int rssi;
-    public MACValueRecord(String mac, int rssi){
+    public MACValueRecord(ByteString mac, int rssi){
         this.mac=mac;
         this.rssi=rssi;
     }

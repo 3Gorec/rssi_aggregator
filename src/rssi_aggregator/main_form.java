@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package rssi_aggregator;
+import com.google.protobuf.ByteString;
 import javax.swing.*;
 import java.awt.Font;
 import java.text.ParseException;
@@ -15,7 +16,8 @@ import javax.swing.text.MaskFormatter;
  * @author gorec
  */
 public class main_form extends javax.swing.JFrame {        
-    RSSIAggregator aggregator;    
+    RSSIAggregator aggregator;       
+    ByteString mac_filter;
     /**
      * Creates new form main_form
      */
@@ -52,6 +54,46 @@ public class main_form extends javax.swing.JFrame {
     } 
     
     
+    public boolean isHexChar(byte ch){
+        if(ch>='0' && ch<='9'){
+            return true;
+        }
+        if(ch>='A' && ch<='F'){
+            return true;
+        }
+        if(ch>='a' && ch <='f'){
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public int ParseMac(String mac, String parsed_mac){                                
+        byte[] mac_byte;
+        mac.replaceAll(":", "");
+        if(mac.length()!=12){
+            return -1;
+        }        
+        mac_byte=mac.getBytes();
+        for(int i=0;i<mac_byte.length;i++){
+            if(!isHexChar(mac_byte[i])){
+                return -2;
+            }            
+        }
+    
+        byte[] parsed_mac_bytes=new byte[6];
+        for(int i=0;i<6;i++){            
+            parsed_mac_bytes[i]=Byte.parseByte(mac.substring(i*2, i*2+1), 16);                        
+        }
+        parsed_mac=new String(parsed_mac_bytes);
+        System.out.println(mac);
+        System.out.println(parsed_mac);
+        for(int i=0;i<6;i++){
+        System.out.println(parsed_mac_bytes[i]);
+        }
+        return 0;
+    }
+    
     private void UpdateOutFileLabel(){
         jLabelOutFileTemplate.setText(jTextFieldOutFileTemplate.getText()+"_"+jSpinnerX.getValue().toString()+"_"+jSpinnerY.getValue().toString());
     }
@@ -82,6 +124,8 @@ public class main_form extends javax.swing.JFrame {
         jTextFieldOutFileTemplate = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jLabelOutFileTemplate = new javax.swing.JLabel();
+        jTextFieldMAC = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
 
         jDialog1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
@@ -174,6 +218,10 @@ public class main_form extends javax.swing.JFrame {
         jLabelOutFileTemplate.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabelOutFileTemplate.setText("captured_0_0");
 
+        jTextFieldMAC.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+
+        jLabel9.setText("MAC filter:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -208,7 +256,10 @@ public class main_form extends javax.swing.JFrame {
                                 .addComponent(jSpinnerY, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(jPanel_SnifferClient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldMAC, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabelOutFileTemplate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -238,7 +289,9 @@ public class main_form extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldOutFileTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldMAC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelOutFileTemplate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -252,6 +305,17 @@ public class main_form extends javax.swing.JFrame {
 
     private void jButton_StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_StartActionPerformed
         int status;        
+        String parsed_mac=new String("");
+        switch(ParseMac(jTextFieldMAC.getText(),parsed_mac)){
+            case -1:
+                outputStatus("Invalid mac");
+                return;
+            case -2:
+                outputStatus("Invalid MAC characters");
+                return;
+            default:
+                break;
+        }
         if(aggregator.running_flag==false){            
             int sniffing_interval=((Number)jSpinnerInterval.getValue()).intValue();
             int pending_period=((Number)jSpinnerPeriod.getValue()).intValue();
@@ -328,6 +392,7 @@ public class main_form extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelOutFileTemplate;
     private javax.swing.JLabel jLabelSnifferStatus;
     private javax.swing.JLabel jLabel_status;
@@ -336,6 +401,7 @@ public class main_form extends javax.swing.JFrame {
     private javax.swing.JSpinner jSpinnerPeriod;
     private javax.swing.JSpinner jSpinnerX;
     private javax.swing.JSpinner jSpinnerY;
+    private javax.swing.JTextField jTextFieldMAC;
     private javax.swing.JTextField jTextFieldOutFileTemplate;
     // End of variables declaration//GEN-END:variables
 }

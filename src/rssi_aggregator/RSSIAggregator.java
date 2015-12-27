@@ -30,7 +30,7 @@ public class RSSIAggregator {
     int aggregate_call_counter;           
     int total_tick_count;  
     boolean sniffing_in_process;
-        
+    Mac mac_filter;
     File out_file;
     PrintWriter writer;    
     AggregatedRSSIData aggregated_data;        
@@ -85,8 +85,9 @@ public class RSSIAggregator {
     }
     
     
-    public int Start(int sniffing_interval_s, int pending_period_s, String out_file_name){
+    public int Start(int sniffing_interval_s, int pending_period_s, String out_file_name, Mac mac_filter){
         try{            
+            this.mac_filter=mac_filter;
             out_file=new File(out_file_name);
             writer=new PrintWriter(out_file);                        
             
@@ -127,9 +128,10 @@ public class RSSIAggregator {
     void CopyRecords(RSSIData sniffer_data, SnifferResponse data, int start_index, int record_cnt){          
         int i=start_index;
         while(i<record_cnt){
-            SnifferResponse.RSSIRecord record=data.getRssiData(i);                 
-            if(FilterDataByMAC(record)){
-                sniffer_data.records.add(new MACValueRecord(record.getMac(), record.getRssi()));
+            SnifferResponse.RSSIRecord pb_rssi_record=data.getRssiData(i);    
+            MACValueRecord new_record=new MACValueRecord(new Mac(pb_rssi_record.getMac().toByteArray()), pb_rssi_record.getRssi());
+            if(FilterDataByMAC(new_record.mac)){
+                sniffer_data.records.add(new_record);
             }   
             i++;
         }
@@ -161,17 +163,15 @@ public class RSSIAggregator {
 
     
     
-    private boolean FilterDataByMAC(SnifferResponse.RSSIRecord record){
-        return true;
+    private boolean FilterDataByMAC(Mac mac){
+        if(mac_filter==null){
+            return true;
+        }
+        return mac.equals(mac_filter);
     }
     
     public void FinishAgregate(){        
-        Gson gson=new GsonBuilder()
-                        .setPrettyPrinting()
-			.create();
-        
-        String json=gson.toJson(aggregated_data);        
-        writer.print(json);
+        writer.print(aggregated_data.seializeData());
         
         form.resetAggregatorState();
         form.outputStatus("Sniffing finished succesfully");

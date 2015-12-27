@@ -52,47 +52,7 @@ public class main_form extends javax.swing.JFrame {
     public void setSnifferStatus(String text){
         jLabelSnifferStatus.setText(text);
     } 
-    
-    
-    public boolean isHexChar(byte ch){
-        if(ch>='0' && ch<='9'){
-            return true;
-        }
-        if(ch>='A' && ch<='F'){
-            return true;
-        }
-        if(ch>='a' && ch <='f'){
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public int ParseMac(String mac, String parsed_mac){                                
-        byte[] mac_byte;
-        mac.replaceAll(":", "");
-        if(mac.length()!=12){
-            return -1;
-        }        
-        mac_byte=mac.getBytes();
-        for(int i=0;i<mac_byte.length;i++){
-            if(!isHexChar(mac_byte[i])){
-                return -2;
-            }            
-        }
-    
-        byte[] parsed_mac_bytes=new byte[6];
-        for(int i=0;i<6;i++){            
-            parsed_mac_bytes[i]=Byte.parseByte(mac.substring(i*2, i*2+1), 16);                        
-        }
-        parsed_mac=new String(parsed_mac_bytes);
-        System.out.println(mac);
-        System.out.println(parsed_mac);
-        for(int i=0;i<6;i++){
-        System.out.println(parsed_mac_bytes[i]);
-        }
-        return 0;
-    }
+
     
     private void UpdateOutFileLabel(){
         jLabelOutFileTemplate.setText(jTextFieldOutFileTemplate.getText()+"_"+jSpinnerX.getValue().toString()+"_"+jSpinnerY.getValue().toString());
@@ -305,23 +265,13 @@ public class main_form extends javax.swing.JFrame {
 
     private void jButton_StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton_StartActionPerformed
         int status;        
-        String parsed_mac=new String("");
-        switch(ParseMac(jTextFieldMAC.getText(),parsed_mac)){
-            case -1:
-                outputStatus("Invalid mac");
-                return;
-            case -2:
-                outputStatus("Invalid MAC characters");
-                return;
-            default:
-                break;
-        }
+        
         if(aggregator.running_flag==false){            
             int sniffing_interval=((Number)jSpinnerInterval.getValue()).intValue();
             int pending_period=((Number)jSpinnerPeriod.getValue()).intValue();
             
             if(sniffing_interval>0){
-                status=aggregator.Start(sniffing_interval,pending_period,jLabelOutFileTemplate.getText());
+                status=aggregator.Start(sniffing_interval,pending_period,jLabelOutFileTemplate.getText(), new Mac(jTextFieldMAC.getText()));
                 if(status==0){
                     jButton_Start.setText("Stop");
                     jSpinnerInterval.setEnabled(false);                             

@@ -12,9 +12,9 @@ import com.google.protobuf.ByteString;
  * @author gorec
  */
 public class MACValueRecord{
-    public ByteString mac;
+    public Mac mac;
     public int rssi;
-    public MACValueRecord(ByteString mac, int rssi){
+    public MACValueRecord(Mac mac, int rssi){
         this.mac=mac;
         this.rssi=rssi;
     }

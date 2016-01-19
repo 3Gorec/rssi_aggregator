@@ -73,7 +73,7 @@ public class RSSIAggregator {
     
     private void InitStartRecordId(){
         for(int i=0;i<sniffers.size();i++){
-            SnifferResponse data=sniffers.get(i).GetData(0);
+            SnifferResponse data=sniffers.get(i).GetData(0);    //flush sniffer buffers
             int count=data.getRssiDataCount();
             if(count>0){
                 sniffers.get(i).last_record_id=data.getRssiData(count-1).getId();
@@ -103,7 +103,7 @@ public class RSSIAggregator {
             aggregated_data=new AggregatedRSSIData(sniffing_interval_s,pending_period_s);
             InitStartRecordId();            
             pendingTask=new AggregatorTimerTask(form, this);                  
-            timer.scheduleAtFixedRate(pendingTask, 0, pending_period_s*1000);                
+            timer.scheduleAtFixedRate(pendingTask, pending_period_s*1000, pending_period_s*1000);                
             running_flag=true;
             form.outputStatus("Sniffing in progress");
             return 0;

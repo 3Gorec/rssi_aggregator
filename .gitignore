@@ -1,6 +1,6 @@
 nbproject/
 build.xml
 manifest.mf
-output.txt
+*.txt
 /build/
 /dist/

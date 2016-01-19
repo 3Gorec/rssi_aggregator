@@ -55,7 +55,7 @@ public class main_form extends javax.swing.JFrame {
 
     
     private void UpdateOutFileLabel(){
-        jLabelOutFileTemplate.setText(jTextFieldOutFileTemplate.getText()+"_"+jSpinnerX.getValue().toString()+"_"+jSpinnerY.getValue().toString());
+        jLabelOutFileTemplate.setText(jTextFieldOutFileTemplate.getText()+"_"+jSpinnerX.getValue().toString()+"_"+jSpinnerY.getValue().toString()+".txt");
     }
      /* This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -177,7 +177,7 @@ public class main_form extends javax.swing.JFrame {
         jLabel8.setText("Name template:");
 
         jLabelOutFileTemplate.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabelOutFileTemplate.setText("captured_0_0");
+        jLabelOutFileTemplate.setText("captured_0_0.txt");
 
         jTextFieldMAC.setText("00:00:00:00:00:00");
         jTextFieldMAC.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));

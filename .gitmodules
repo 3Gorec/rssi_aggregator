@@ -1,0 +1,3 @@
+[submodule "src/rssi_data_p"]
+	path = src/rssi_data_p
+	url = git@github.com:3Gorec/rssi_data_p.git

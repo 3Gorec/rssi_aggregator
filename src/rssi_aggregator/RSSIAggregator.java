@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import sniffer_prot.prot_buf.*;
-import rssi_data.*;
+import rssi_data_p.*;
 
 /**
  *

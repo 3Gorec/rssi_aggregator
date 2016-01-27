@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.awt.Font;
 import java.text.ParseException;
 import javax.swing.text.MaskFormatter;
-
+import rssi_data.*;
 
 /**
  *

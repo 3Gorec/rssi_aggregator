@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_aggregator;
+package rssi_data;
 
 import java.util.Arrays;
 
@@ -49,7 +49,7 @@ public class Mac{
     }
 
     
-    Mac(String mac) throws NullPointerException, IllegalArgumentException{
+    public Mac(String mac) throws NullPointerException, IllegalArgumentException{
         if(mac==null){
             throw new NullPointerException();
         }
@@ -72,7 +72,7 @@ public class Mac{
         }
     }
     
-    Mac(byte[] mac){
+    public Mac(byte[] mac){
         if(mac==null){
             throw new NullPointerException();   
         }

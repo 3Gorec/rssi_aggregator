@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_aggregator;
+package rssi_data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,9 +18,9 @@ import java.util.ArrayList;
 
 public class AggregatedRSSIData {
     
-    int aggregate_time_s;
-    int tick_interval_s;
-    ArrayList<TickRSSIData> tick_rssi_data;
+    public int aggregate_time_s;
+    public int tick_interval_s;
+    public ArrayList<TickRSSIData> tick_rssi_data;
 
     public AggregatedRSSIData(int aggregate_time_s, int tick_interval_s) {
         tick_rssi_data=new ArrayList<>();

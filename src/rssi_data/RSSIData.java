@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rssi_aggregator;
+package rssi_data;
 
 import java.util.ArrayList;
 
@@ -13,9 +13,9 @@ import java.util.ArrayList;
  */
 public class RSSIData {
     
-    int snifferId;
-    String SnifferName;
-    ArrayList<MACValueRecord>  records;
+    public int snifferId;
+    public String SnifferName;
+    public ArrayList<MACValueRecord>  records;
     
     public RSSIData(int id, String name){
         records=new ArrayList<MACValueRecord>();

@@ -125,7 +125,7 @@ public class RSSIAggregator {
     }
     
         
-    void CopyRecords(RSSIData sniffer_data, SnifferResponse data, int start_index, int record_cnt){          
+    void CopyRecords(SnifferRSSIData sniffer_data, SnifferResponse data, int start_index, int record_cnt){          
         int i=start_index;
         while(i<record_cnt){
             SnifferResponse.RSSIRecord pb_rssi_record=data.getRssiData(i);    
@@ -136,23 +136,23 @@ public class RSSIAggregator {
             i++;
         }
         int tick_index=aggregated_data.tick_rssi_data.size()-1;
-        aggregated_data.tick_rssi_data.get(tick_index).rssi_data.add(sniffer_data);      
+        aggregated_data.tick_rssi_data.get(tick_index).sniffer_rssi_data.add(sniffer_data);      
         
     }    
     
     private int ProcessData(SnifferResponse data, SnifferController sniffer){      
         int record_cnt=data.getRssiDataCount();
-        RSSIData sniffer_data;
+        SnifferRSSIData sniffer_data;
         System.out.println("Tick"); //todo remove        
         
         if(sniffer.last_record_id!=0 && record_cnt>1){
-            sniffer_data=new RSSIData(sniffer.id, sniffer.name);     
+            sniffer_data=new SnifferRSSIData(sniffer.id, sniffer.name);     
             CopyRecords(sniffer_data,data,1,record_cnt-1);
             sniffer.last_record_id=data.getRssiData(record_cnt-1).getId();
         }
         else{
             if(sniffer.last_record_id==0 && record_cnt>0){
-                sniffer_data=new RSSIData(sniffer.id, sniffer.name);     
+                sniffer_data=new SnifferRSSIData(sniffer.id, sniffer.name);     
                 CopyRecords(sniffer_data,data,0,record_cnt);
                 sniffer.last_record_id=data.getRssiData(record_cnt-1).getId();
             }
